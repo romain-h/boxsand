@@ -66,11 +66,43 @@ install_ruby () {
   sudo apt-get install -y ruby2.1
 }
 
+install_java () {
+  sudo apt-get install -y python-software-properties
+
+  if [ ! -f /etc/apt/sources.list.d/webupd8team-java-precise.list ]; then
+    sudo add-apt-repository ppa:webupd8team/java
+    sudo apt-get update
+  fi
+
+  sudo apt-get install -y oracle-java8-installer
+}
+
+install_scala () {
+  if [ ! $(which scala) ]; then
+    curl -s -o /tmp/scala-2.10.5.tgz http://downloads.typesafe.com/scala/2.10.5/scala-2.10.5.tgz
+    tar -xzf /tmp/scala-2.10.5.tgz -C /tmp
+    sudo mv /tmp/scala-2.10.5 /usr/local/share/scala
+    echo "export SCALA_HOME=\"/usr/local/share/scala\"" >> $HOME/.env_custom
+    echo "export PATH=\"\$PATH:\$SCALA_HOME/bin\"" >> $HOME/.env_custom
+
+    # Install sbt
+    if [ ! /etc/apt/sources.list.d/sbt.list ]; then
+      echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+      sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
+      sudo apt-get update
+    fi
+
+    sudo apt-get install sbt
+  fi
+}
+
 main () {
   apt_get_update
   install_dotfiles
   install_go
   install_ruby
+  install_java
+  install_scala
 }
 
 main
